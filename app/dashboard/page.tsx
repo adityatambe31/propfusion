@@ -299,23 +299,29 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Asset Distribution */}
-              <div className="bg-white dark:bg-[#181818] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Asset Distribution
-                </h3>
-                <AssetDistributionChart properties={properties} lands={lands} />
-              </div>
-
-              {/* Occupancy Status (only show if there are properties) */}
-              {properties.length > 0 && (
+              {/* Asset Distribution and Occupancy Status */}
+              <div
+                className={`grid grid-cols-1 ${properties.length > 0 ? "lg:grid-cols-2" : "lg:grid-cols-1"} gap-6`}
+              >
                 <div className="bg-white dark:bg-[#181818] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Occupancy Status
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                    Asset Distribution
                   </h3>
-                  <OccupancyChart properties={properties} />
+                  <AssetDistributionChart properties={properties} lands={lands} />
                 </div>
-              )}
+
+                {/* Occupancy Status (only show if there are properties) */}
+                {properties.length > 0 && (
+                  <div className="bg-white dark:bg-[#181818] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                      Occupancy Status
+                    </h3>
+                    <OccupancyChart properties={properties} />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="bg-white dark:bg-[#181818] rounded-xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm">
