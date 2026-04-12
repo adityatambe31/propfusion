@@ -266,9 +266,26 @@ export default function AgricultureDashboard() {
     router.push(`/dashboard/agriculture/${landId}`);
   };
 
+  const getLandImageFallback = (land: Land) => {
+    const label = land.crop || "Farmland";
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1f7a3f" />
+            <stop offset="100%" stop-color="#5aa469" />
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="800" fill="url(#bg)" />
+        <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-size="64" font-family="Arial, sans-serif" font-weight="700">${label}</text>
+      </svg>
+    `;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  };
+
   // Get default land image based on crop type
   const getLandImage = (land: Land) => {
-    if (land.image) return land.image;
+    if (land.image?.trim()) return land.image;
 
     const cropImages: Record<string, string> = {
       Corn: "https://images.unsplash.com/photo-1601593768799-76c79c56f726?w=400&h=300&fit=crop",
@@ -291,10 +308,7 @@ export default function AgricultureDashboard() {
         "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=300&fit=crop",
     };
 
-    return (
-      cropImages[land.crop] ||
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop"
-    );
+    return cropImages[land.crop] || getLandImageFallback(land);
   };
 
   return (
@@ -467,6 +481,9 @@ export default function AgricultureDashboard() {
                       src={getLandImage(land)}
                       alt={land.name || "Land"}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        e.currentTarget.src = getLandImageFallback(land);
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     

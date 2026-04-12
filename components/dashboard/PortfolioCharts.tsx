@@ -374,32 +374,112 @@ export function RevenueVsExpensesChart({
   properties,
   lands,
 }: PortfolioChartsProps) {
-  const calcExpenses = (
-    exp?: Record<string, string | undefined>
-  ): number => {
+  const calcExpenses = (exp?: Record<string, string | undefined>): number => {
     if (!exp) return 0;
-    return Object.values(exp).reduce(
-      (sum, val) => sum + parseCurrency(val),
-      0
-    );
+    return Object.values(exp).reduce((sum, val) => sum + parseCurrency(val), 0);
   };
 
-  const propertyData = properties.map((p) => ({
+  const propertyData = properties.slice(0, 6).map((p) => ({
     name: p.name || "Property",
     revenue: parseCurrency(p.price),
     expenses: calcExpenses(p.expenses),
   }));
 
-  const landData = lands.map((l) => ({
+  const landData = lands.slice(0, 6).map((l) => ({
     name: l.name || "Land",
     // Land values are annual in source data; convert to monthly for comparability.
     revenue: parseCurrency(l.profit) / 12,
     expenses: calcExpenses(l.expenses) / 12,
   }));
 
-  const data = [...propertyData, ...landData].slice(0, 6);
+  const renderPanel = (
+    title: string,
+    data: Array<{ name: string; revenue: number; expenses: number }>,
+    accent: string,
+  ) => {
+    if (data.length === 0) {
+      return (
+        <div className="rounded-lg border border-gray-100 dark:border-gray-800 p-4 h-[300px] flex items-center justify-center text-gray-500">
+          No data available
+        </div>
+      );
+    }
 
-  if (data.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-100 dark:border-gray-800 p-3">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+          <span className={`w-2.5 h-2.5 rounded-full ${accent}`}></span>
+          {title}
+        </h4>
+        <ResponsiveContainer width="100%" height={data.length * 48 + 60}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 4, right: 12, left: 95, bottom: 4 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#374151"
+              opacity={0.2}
+              horizontal={true}
+              vertical={false}
+            />
+            <XAxis
+              type="number"
+              tick={{ fill: "#9ca3af", fontSize: 11 }}
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              dataKey="name"
+              type="category"
+              tick={{ fill: "#9ca3af", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              width={90}
+            />
+            <Tooltip
+              cursor={{ fill: "transparent" }}
+              contentStyle={{
+                backgroundColor: "#111111",
+                border: "1px solid #333333",
+                borderRadius: "12px",
+                fontSize: "12px",
+                color: "#fff",
+              }}
+              itemStyle={{ color: "#fff" }}
+              formatter={(value: number | string | undefined) =>
+                `$${Number(value || 0).toLocaleString()}`
+              }
+            />
+            <Legend
+              verticalAlign="top"
+              height={28}
+              iconType="circle"
+              wrapperStyle={{ fontSize: "11px", paddingTop: "0px" }}
+            />
+            <Bar
+              dataKey="revenue"
+              fill="#10b981"
+              name="Revenue"
+              radius={[0, 4, 4, 0]}
+              barSize={14}
+            />
+            <Bar
+              dataKey="expenses"
+              fill="#ef4444"
+              name="Expenses"
+              radius={[0, 4, 4, 0]}
+              barSize={14}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  };
+
+  if (propertyData.length === 0 && landData.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-gray-500">
         No data available
@@ -408,70 +488,10 @@ export function RevenueVsExpensesChart({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={data.length * 50 + 60}>
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-      >
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="#374151"
-          opacity={0.2}
-          horizontal={true}
-          vertical={false}
-        />
-        <XAxis
-          type="number"
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
-          tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis
-          dataKey="name"
-          type="category"
-          tick={{ fill: "#9ca3af", fontSize: 11 }}
-          axisLine={false}
-          tickLine={false}
-          width={90}
-        />
-        <Tooltip
-          cursor={{ fill: "transparent" }}
-          contentStyle={{
-            backgroundColor: "#111111",
-            border: "1px solid #333333",
-            borderRadius: "12px",
-            fontSize: "12px",
-            color: "#fff",
-          }}
-          itemStyle={{ color: "#fff" }}
-          formatter={(value: number | string | undefined) =>
-            `$${Number(value || 0).toLocaleString()}`
-          }
-        />
-        <Legend 
-          verticalAlign="top" 
-          height={36} 
-          iconType="circle"
-          wrapperStyle={{ fontSize: '11px', paddingTop: '0px' }}
-        />
-        <Bar
-          dataKey="revenue"
-          fill="#10b981"
-          name="Revenue"
-          radius={[0, 4, 4, 0]}
-          barSize={15}
-        />
-        <Bar
-          dataKey="expenses"
-          fill="#ef4444"
-          name="Expenses"
-          radius={[0, 4, 4, 0]}
-          barSize={15}
-        />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      {renderPanel("Real Estate", propertyData, "bg-blue-500")}
+      {renderPanel("Agriculture", landData, "bg-green-500")}
+    </div>
   );
 }
 

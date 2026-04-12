@@ -334,7 +334,10 @@ export function Sidebar({
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+          <div
+            className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-4"
+            style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
+          >
             {/* Main Menu */}
             <div className="space-y-1">
               {menuItems.map((item) => {
